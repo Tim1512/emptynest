@@ -30,7 +30,7 @@ type Server struct {
 func (s *Server) debug(msg string) {
 	if s.Ctx.Debug {
 		go func(msg string) {
-			s.Ctx.DebugChan <- msg
+			s.Ctx.DebugChan <- fmt.Sprintf("Transport %s: %s", s.Name(), msg)
 		}(msg)
 	}
 }

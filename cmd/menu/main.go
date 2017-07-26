@@ -113,8 +113,16 @@ func main() {
 			fmt.Print("$> ")
 		}
 	}()
-
 	fmt.Println("[-] Listening for messages")
+
+	if conf.Debug {
+		go func() {
+			for debugMsg := range debugChan {
+				fmt.Printf("[*] DEBUG: %s\n", debugMsg)
+			}
+		}()
+	}
+
 	for {
 		fmt.Print("$> ")
 		text, _ := reader.ReadString('\n')

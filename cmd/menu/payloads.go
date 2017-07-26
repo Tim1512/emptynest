@@ -30,7 +30,7 @@ func addPayload(args []string) {
 	payload := emptynest.Payload{
 		Name: name,
 		Kind: plug.Name(),
-		Data: append([]byte{byte(plug.ID())}, data...),
+		Data: data,
 	}
 	db.Save(&payload)
 }

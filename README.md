@@ -27,3 +27,82 @@ crypto_plugin_locations = ["rc4.so", "aes_ctr.so"] # encryption plugins to use
 key_chain = ["41414141", "6c66524838567039306971486a32595052304b64773358693432334145637636"] # encryption keys in order of plugin
 ```
 The possibilities are endless. For example, you could modify RC4 plugin to brute-force an incoming key. You may notice the server plugins provided in the repo do not implemented authenticated encryption, a principal you can read more about [here](https://moxie.org/blog/the-cryptographic-doom-principle/). We did this to keep message lengths to a minimum, again, the idea behind this project was to have minimal functionality and minimal traffic between the server and agent. You can easily modify the encryption plugins or handler itself to validate the message integrity should you feel that is needed.
+
+## Installation
+
+Ensure that you have Go 1.9 installed, as the plugin functionality requires it. If you have another version, or don't have Go, follow the instructions [here](https://golang.org/doc/install) 
+```
+user@debian:~$ go version
+go version go1.9 linux/amd64
+```
+
+First, download the GitHub repository to your $GOPATH (using ~/.go for this example):
+```
+user@debian:~$ go get github.com/empty-nest/emptynest
+```
+
+Go into the repository folder:
+```
+user@debian:~$ cd $GOPATH/src/github.com/empty-nest/emptynest/
+```
+
+Install all prerequisites:
+```
+user@debian:~/.go/src/github.com/empty-nest/emptynest$ go get ./...
+# github.com/empty-nest/emptynest/plugins/crypto/aes_ctr
+runtime.main_main·f: relocation target main.main not defined
+runtime.main_main·f: undefined: "main.main"
+# github.com/empty-nest/emptynest/plugins/crypto/des
+runtime.main_main·f: relocation target main.main not defined
+runtime.main_main·f: undefined: "main.main"
+# github.com/empty-nest/emptynest/plugins/crypto/rc4
+runtime.main_main·f: relocation target main.main not defined
+runtime.main_main·f: undefined: "main.main"
+# github.com/empty-nest/emptynest/plugins/encoders/base32
+runtime.main_main·f: relocation target main.main not defined
+runtime.main_main·f: undefined: "main.main"
+# github.com/empty-nest/emptynest/plugins/encoders/base64
+runtime.main_main·f: relocation target main.main not defined
+runtime.main_main·f: undefined: "main.main"
+# github.com/empty-nest/emptynest/plugins/encoders/hex
+runtime.main_main·f: relocation target main.main not defined
+runtime.main_main·f: undefined: "main.main"
+# github.com/empty-nest/emptynest/plugins/info/basic
+runtime.main_main·f: relocation target main.main not defined
+runtime.main_main·f: undefined: "main.main"
+# github.com/empty-nest/emptynest/plugins/payloads/command
+runtime.main_main·f: relocation target main.main not defined
+runtime.main_main·f: undefined: "main.main"
+# github.com/empty-nest/emptynest/plugins/payloads/proxy
+runtime.main_main·f: relocation target main.main not defined
+runtime.main_main·f: undefined: "main.main"
+# github.com/empty-nest/emptynest/plugins/payloads/shellcode
+runtime.main_main·f: relocation target main.main not defined
+runtime.main_main·f: undefined: "main.main"
+# github.com/empty-nest/emptynest/plugins/transports/http
+runtime.main_main·f: relocation target main.main not defined
+runtime.main_main·f: undefined: "main.main"
+```
+
+Build Empty-Nest:
+```
+user@debian:~/.go/src/github.com/empty-nest/emptynest$ make
+mkdir server
+go build -buildmode=plugin -o server/http.so plugins/transports/http/main.go
+go build -buildmode=plugin -o server/base32.so plugins/encoders/base32/main.go
+go build -buildmode=plugin -o server/base64.so plugins/encoders/base64/main.go
+go build -buildmode=plugin -o server/hex.so plugins/encoders/hex/main.go
+go build -buildmode=plugin -o server/des.so plugins/crypto/des/main.go
+go build -buildmode=plugin -o server/rc4.so plugins/crypto/rc4/main.go
+go build -buildmode=plugin -o server/aes_ctr.so plugins/crypto/aes_ctr/main.go
+go build -buildmode=plugin -o server/basic.so plugins/info/basic/main.go
+mkdir server/plugins
+go build -buildmode=plugin -o server/plugins/shellcode.so plugins/payloads/shellcode/main.go
+cd cmd/menu && go get -v && go build -v
+github.com/empty-nest/emptynest/cmd/menu
+mv cmd/menu/menu server/
+cp config.toml server/
+cp http.toml server/
+```
+
+This will leave you with the binary of 'menu' in $GOPATH/src/github.com/empty-nest/emptynest/server/
